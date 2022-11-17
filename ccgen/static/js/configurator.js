@@ -41,6 +41,8 @@ $(document).ready(function () {
         goflows = JSON.parse(data);
     });
     
+    network = window.localStorage.getItem('network');
+    if (!network) $('#modusNetworkSelector').val("offline").trigger('change'); 
     direction = window.localStorage.getItem('direction');    
     if (direction) $('#modusDirectionSelector').val(direction).trigger('change');
     else $('#modusDirectionSelector').val("inject").trigger('change');
@@ -415,7 +417,7 @@ function handleDirectionSelector() {
         if (network == "online") $('#filteriptableschain').val("INPUT").trigger('change');
     }
     settingFields = new Array(9).fill(true);
-    window.localStorage.setItem('direction', selected)
+    window.localStorage.setItem('direction', selected);
     setSetting(true);
 }
 
@@ -572,7 +574,7 @@ function validateConfig() {
     config.name = $('#configname').val();
     config.input_file = $('#configinput').val() ? $('#configinput').val() : null;
     config.output_file = $('#configoutput').val() ? $('#configoutput').val() : null;
-    if (direction == "inject") {
+    if (config.direction == "inject") {
         if (!config.hasOwnProperty('message')) config.message = {};
         if (!config.message.hasOwnProperty('id')) config.message.id = '';
         config.message.message = $('#configmessage').val() ? $('#configmessage').val() : null;
