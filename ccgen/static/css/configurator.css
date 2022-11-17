@@ -1,0 +1,83 @@
+.btn {
+    font-size: 1.2em;
+}
+
+.btn-primary {
+    font-size: 1.5em;
+}
+
+.form-group {
+    display: flex;
+    padding-top: 0.8em;
+}
+
+.form-group label {
+    width: 36%;
+    display: flex;
+    align-items: center;
+}
+
+.form-group div {
+    width: 64%;
+}
+
+.configurator-main {
+    max-height: 82vh;
+    width: 98%;
+    overflow: hidden;
+    margin: 1%;
+    border: 1px outset #333;
+    border-radius: 0.7em;
+    background-color: #c5cdd9;
+}
+
+#configform {
+    border-top: 1px outset #333;
+}
+
+.mapping-area {
+    max-height: 55vh;
+    overflow: auto;
+}
+
+#valuemapping-area label {
+    width: 36%;
+    display: flex;
+    align-items: center;
+}
+
+#valuemapping-area .form-control {
+    width: 22%;
+}
+
+#parameter-area label {
+    width: 36%;
+    display: flex;
+    align-items: center;
+}
+
+#parameter-area .form-control {
+    width: 22%;
+}
+
+.modal-body p {
+    margin-bottom: -0.1em;
+}
+
+.wrapper-view-container {
+    display: none;
+    background-color: #c5cdd9;
+    margin: 1%;
+    border: 1px outset #333;
+    border-radius: 0.7em;
+}
+
+.wrapper-view {
+    overflow-y: auto;
+}
+
+.thead-light th {
+    position: sticky;
+    top: 0;
+    background-color: #c5cdd9;
+}

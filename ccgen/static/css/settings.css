@@ -1,0 +1,32 @@
+.form-group {
+    display: flex;
+    padding-top: 0.8em;
+}
+
+.form-group label {
+    width: 30%;
+    display: flex;
+    align-items: center;
+}
+
+.form-group div {
+    width: 70%;
+}
+
+.settings-main {
+    max-height: 82vh;
+    width: 98%;
+    overflow: hidden;
+    margin: 1%;
+    border: 1px outset #333;
+    border-radius: 0.7em;
+    background-color: #c5cdd9;
+}
+
+#settingform {
+    border-top: 1px outset #333;
+}
+
+.modal-body p {
+    margin-bottom: -0.1em;
+}

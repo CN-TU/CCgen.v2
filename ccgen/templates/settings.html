@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
+    <link href="/static/css/settings.css" rel="stylesheet">
+    <script src="/static/js/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/settings.js"></script>
+    <link rel="icon" type="image/png" href="" />
+    <title>CCgen.v2 Settings</title>
+</head>
+
+<body class="w-100" style="overflow: hidden;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="">
+            <ul class="navbar-nav d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="configurator">Configurator</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="settings">Settings</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="settings-main">
+        <div class="p-1">
+            <div class="d-flex justify-content-start">
+                <h2 style="width: 10%;">Setting</h2>
+                <div style="width: 25%;">
+                    <select class="form-control" id="settingSelector" onchange="handleSettingSelector()">
+                        <option selected="selected">Create new setting</option>
+                    </select>
+                    <small class="form-text text-muted">Select from database or create new setting</small>
+                </div>
+                <div class="d-flex align-items-start" style="width: 8%;">
+                    <button type="button" class="btn" onclick="deleteSetting()"><img width="30"
+                            src="/static/imgs/trash.svg"></button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <div class="form-group w-33 p-1">
+                    <label for="settingname"><b>Setting name</b></label>
+                    <div class="d-block">
+                        <input type="text" class="form-control" id="settingname" onchange="setFileName(this)"
+                            placeholder="Enter name" required>
+                        <small class="form-text text-muted">Setting name must be unique to save to
+                            database</small>
+                    </div>
+                </div>
+                <div class="form-group w-33 p-1">
+                    <label for="mappinglayerSelector"><b>Network</b></label>
+                    <div class="d-block w-100 justify-content-between">
+                        <select class="form-control is-valid" id="settingNetworkSelector"
+                            onchange="handleNetworkSelector(this)">
+                            <option selected="selected">offline</option>
+                            <option>online</option>
+                        </select>
+                        <small class="form-text text-muted">Specify category of setting</small>
+                    </div>
+                </div>
+                <div class="form-group w-33 p-1">
+                    <label><b>Direction</b></label>
+                    <div class="d-block w-100 justify-content-between">
+                        <select class="form-control is-valid" id="settingDirectionSelector"
+                            onchange="handleDirectionSelector(this)">
+                            <option selected="selected">inject</option>
+                            <option>extract</option>
+                        </select>
+                        <small class="form-text text-muted">Specify category of setting</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="d-flex" id="settingform">
+            <div class="w-50 p-2" style="background-color: #b1dae6; border-right: 1px outset #333;">
+                <h5>Config & Files</h5>
+                <div class="form-group">
+                    <label for="settinginput">Input file</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control is-valid" id="settinginput" onchange="checkPath(this)"
+                            placeholder="Enter path to file or folder" value="">
+                        <small class="form-text text-muted">Input path</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingoutput">Output file</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control is-valid" id="settingoutput" onchange="checkPath(this)"
+                            placeholder="Enter path to file or folder" value="">
+                        <small class="form-text text-muted">Output path </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingmessage">Covert message [text]</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control is-valid" id="settingmessage"
+                            onchange="setCovertMessage(this)" placeholder="Enter message to hide" value="">
+                        <small class="form-text text-muted">This message will be injected</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingmessage">Covert message [link]</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control is-valid" id="settingmessagelink"
+                            onchange="checkPath(this)" placeholder="Enter link to message file to hide in covert channel" value="">
+                        <small class="form-text text-muted">Text of this message file will be injected</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingMessageSelector">Covert message type</label>
+                    <div class="d-block">
+                        <select class="form-control is-valid" id="settingMessageSelector"
+                            onchange="handleMessageSelector(this.value)">
+                            <option selected="selected">text</option>
+                            <option>link</option>
+                        </select>
+                        <small class="form-text text-muted">Choose the source of the message</small>
+                    </div>
+                </div>
+            </div>
+            <div class="w-50 p-2" style="background-color: #c2dae6; border-right: 1px outset #333;">
+                <h5>Filters</h5>
+                <div class="form-group">
+                    <label for="settingsrcip">Source IP Address</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control is-valid" id="settingsrcip" onchange="setIpAddress(this)"
+                            placeholder="Enter IP address" value="">
+                        <small class="form-text text-muted">Input file is filtered after that source ip
+                            address</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingsrcport">Source Port</label>
+                    <div class="d-block">
+                        <input type="number" class="form-control is-valid" id="settingsrcport" onchange="setPort(this)"
+                            value="null" placeholder="Enter port number">
+                        <small class="form-text text-muted">Input file is filtered after that source
+                            port</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingdstip">Destination IP Address</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control is-valid" id="settingdstip" onchange="setIpAddress(this)"
+                            placeholder="Enter IP address" value="">
+                        <small class="form-text text-muted">Input is filtered after that destination ip
+                            address</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingdstport">Destination Port</label>
+                    <div class="d-block">
+                        <input type="number" class="form-control is-valid" id="settingdstport" onchange="setPort(this)"
+                            value="null" placeholder="Enter port number">
+                        <small class="form-text text-muted">Input file is filtered after that destination
+                            port</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingproto">IP Protocol</label>
+                    <div class="d-block">
+                        <input type="number" class="form-control is-valid" id="settingproto"
+                            onchange="setNullableInteger(this, -1, 32)" value="null"
+                            placeholder="Enter IP protocol number">
+                        <small class="form-text text-muted">Input file is filtered after that ip protocol
+                            number</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingiptablesqueue">IP tables queue</label>
+                    <div class="d-block">
+                        <input type="number" class="form-control is-valid" id="settingiptablesqueue"
+                            onchange="setNullableInteger(this, -1, 256)" value=""
+                            placeholder="Enter IP tables queue number">
+                        <small class="form-text text-muted">Defines --queue-num option for NFQUEUE</small>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="d-flex w-100 justify-content-end p-3 pt-0 align-items-center">
+        <button type="button" class="btn btn-secondary d-none" id="activationBtn"
+            onclick="activateSetting()">Activate</button>
+        <div class="w-1"></div>
+        <button type="button" class="btn btn-primary btn-lg" onclick="validateSetting()">Validate</button>
+    </div>
+    <div class="modal" id="settingsummary" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Config summary</h5>
+                    <button type="button" class="close" onclick="closeModal()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Edit</button>
+                    <button type="submit" class="btn btn-primary" onclick="sendSetting()">Save setting</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

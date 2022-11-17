@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
+    <script src="/static/js/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <link rel="icon" type="image/png" href="" />
+    <title>CCgen.v2 Dashboard</title>
+</head>
+
+<body class="w-100" style="overflow: hidden;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="">
+            <ul class="navbar-nav d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="configurator">Configurator</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="settings">Settings</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="d-flex">
+        <div class="w-60 process-view">
+            <div class="queue-view-container">
+                <h4 class="p-1 pb-0">Queue</h4>
+                <div class="queue-view">
+                    <table class="table table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Network</th>
+                                <th scope="col">Direction</th>
+                                <th scope="col">Config</th>
+                                <th scope="col">Mapping</th>
+                                <th scope="col">Queued</th>
+                                <th scope="col">Started</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queue-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="history-view-container mt-2">
+                <h5 class="p-1 pb-0">History</h5>
+                <div class="history-view">
+                    <table class="table table-sm table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Network</th>
+                                <th scope="col">Direction</th>
+                                <th scope="col">Config</th>
+                                <th scope="col">Mapping</th>
+                                <th scope="col">Queued</th>
+                                <th scope="col">Started</th>
+                                <th scope="col">Finished</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="w-40">
+            <div class="task-info">
+                <div class="d-flex justify-content-between">
+                    <h4>Task details</h4>
+                    <div class="d-flex p-1">
+                        <button type="button" class="btn-close" onclick="closeDetails()"></button>
+                    </div>
+                </div>
+                <div class="pt-3" id="infos"></div>
+            </div>
+            <div class="spammer-info">
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-sm" title="Get Spammer VM Status" id="status_vm" onclick="statusVM()"><img
+                            width="20" src="/static/imgs/arrow-counterclockwise.svg"></button>
+                    <button type="button" class="btn btn-sm" title="Open spammer settings." id="config_vm"
+                        onclick="openConfigurator()"><img width="20" src="/static/imgs/gear.svg"></button>
+                </div>
+                <div class="d-flex">
+                    <div class="w-50 d-flex justify-content-center align-items-center">
+                        <div class="d-block">
+                            <div>
+                                <img width="150" src="/static/imgs/pc.svg">
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <h4 class="mt-3">Spammer VM</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-50 d-flex justify-content-center align-items-center mt-2">
+                        <div class="d-block">
+                            <div class="d-flex justify-content-center">
+                                <button type="button" id="startVM" class="btn btn-success" onclick="startVM()"
+                                    disabled>Start</button>
+                                <div>&nbsp;</div>
+                                <button type="button" id="stopVM" class="btn btn-danger"
+                                    onclick="stopVM()">Stop</button>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <button type="button" id="sshVM" class="btn btn-secondary mt-2"
+                                    onclick="sshVM()">Console</button>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <p><b>Status:&nbsp;</b><span id="vm_status">initializing...</span></p>
+                                <p><b>IP:&nbsp;</b><span id="vm_ip">-</span></p>
+                                <div class="d-flex align-items-center">
+                                    <p><b>Spammer:&nbsp;</b><span id="vm_spammer">-</span></p>
+                                    <button type="button" id="startSpammerBtn" class="btn btn-sm ml-2"
+                                        onclick="startSpammerScript()"><img width="20"
+                                            title="Start spammer.py explicitely" src="/static/imgs/play.svg"></button>
+                                    <button type="button" id="stopSpammerBtn" class="btn btn-sm ml-2"
+                                        onclick="stopSpammerScript()"><img width="20" title="Stop spammer.py"
+                                            src="/static/imgs/stop.svg"></button>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <p><b>Listener:&nbsp;</b><span id="vm_listener">-</span></p>
+                                    <button type="button" id="startListenerBtn" class="btn btn-sm ml-2"
+                                        onclick="startListenerScript()"><img width="20"
+                                            title="Start spammer.py explicitely" src="/static/imgs/play.svg"></button>
+                                    <button type="button" id="stopListenerBtn" class="btn btn-sm ml-2"
+                                        onclick="stopListenerScript()"><img width="20" title="Stop spammer.py"
+                                            src="/static/imgs/stop.svg"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="configurator" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Configurator for Spammer/Listener</h5>
+                    <button type="button" class="close" onclick="closeModal()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body d-block">
+                    <div class="d-flex justify-content-between">
+                        <div class="form-group d-flex align-items-center">
+                            <label class="w-75" for="configdstip">Destination address</label>
+                            <input type="text" class="form-control" id="configdstip" onchange="setIpAddress(this)"
+                                placeholder="Enter host address" required>
+                        </div>
+                        <button type="button" class="btn btn-info" onclick="createInstruction(null, null)">
+                            Add Instruction <span aria-hidden="true">&plus;</span>
+                        </button>
+                    </div>
+                    <div class="pt-2">
+                        <h5>Instructions</h5>
+                        <div id="instructions"></div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">Listener config will be generated automatically!</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" onclick="validateAndSendConfig()">Save config &
+                        restart
+                        services</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+
+</html>

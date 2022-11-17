@@ -1,0 +1,21 @@
+ { 
+	"version": "v2", 
+	"preprocessing": {  
+		"flows": [{ 
+			"active_timeout": 300 , 
+			"idle_timeout": 300 , 
+			"features": [ 
+				"flowStartMilliseconds", 
+				"flowDurationMilliseconds", 
+				"sourceIPAddress", 
+				"destinationIPAddress", 
+				"packetTotalCount" 
+			], 
+			"bidirectional": false, 
+			"key_features": [ 
+				"sourceIPAddress", 
+				"destinationIPAddress" 
+			] 
+		}] 
+	} 
+} 

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
+    <link href="/static/css/configurator.css" rel="stylesheet">
+    <script src="/static/js/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/configurator.js"></script>
+    <link rel="icon" type="image/png" href="" />
+    <title>CCgen.v2 Configurator</title>
+</head>
+
+<body class="w-100" style="overflow: auto;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="">
+            <ul class="navbar-nav d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="configurator">Configurator</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="settings">Settings</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div id="wrapper-area" class="wrapper-view-container">
+        <div class="d-flex w-100">
+            <div class="w-20 p-1 pb-0">
+                <h4>Config Wrapper</h4>
+            </div>
+            <div class="w-60 d-flex justify-content-between">
+                <div class="form-group w-50 p-1">
+                    <label for="wrapperinput"><b>Input file</b></label>
+                    <input type="text" class="form-control" id="wrapperinput" onchange="setInput(this)"
+                        placeholder="Enter name" required>
+                </div>
+                <div class="form-group w-50 p-1">
+                    <label for="wrapperoutput"><b>Output file</b></label>
+                    <input type="text" class="form-control" id="wrapperoutput" onchange="setOutput(this)"
+                        placeholder="Enter name" required>
+                </div>
+            </div>
+            <div class="w-20 d-flex align-items-start justify-content-end p-1">
+                <button type="submit" class="btn btn-primary" style="font-size: 1.2em;" onclick="validateWrapper()">Validate wrapper</button>
+            </div>
+        </div>
+        <div class="wrapper-view">
+            <table class="table table-sm table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Mapping</th>
+                        <th scope="col">Technique</th>
+                        <th scope="col">Message</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Constraints</th>
+                        <th scope="col">Repetition</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="wrapper-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="configurator-main">
+        <div class="p-1">
+            <div class="d-flex justify-content-start">
+                <h2 style="width: 12%;">Config</h2>
+                <div style="width: 25%;">
+                    <select class="form-control" id="configSelector" onchange="handleConfigSelector()">
+                        <option selected="selected">Create new config</option>
+                    </select>
+                    <small class="form-text text-muted">Select from database or create new config</small>
+                </div>
+                <div class="d-flex align-items-start" style="width: 8%;">
+                    <button type="button" class="btn" onclick="deleteConfig()"><img width="25"
+                            src="/static/imgs/trash.svg"></button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <div class="form-group w-33 p-1">
+                    <label for="configname"><b>Config name</b></label>
+                    <div class="d-block">
+                        <input type="text" class="form-control" id="configname" onchange="setFileName(this)"
+                            placeholder="Enter name" required>
+                        <small class="form-text text-muted">Config name must be unique to save to
+                            database</small>
+                    </div>
+                </div>
+                <div class="form-group w-33 p-1">
+                    <label for="modusNetworkSelector"><b>Network</b></label>
+                    <div class="d-block">
+                        <select class="form-control is-valid" id="modusNetworkSelector"
+                            onchange="handleNetworkSelector()">
+                            <option selected="selected">offline</option>
+                            <option>online</option>
+                        </select>
+                        <small class="form-text text-muted">Select modus for CCgen configuration</small>
+                    </div>
+                </div>
+                <div class="form-group w-33 p-1">
+                    <label for="modusDirectionSelector"><b>Direction</b></label>
+                    <div class="d-block">
+                        <select class="form-control is-valid" id="modusDirectionSelector"
+                            onchange="handleDirectionSelector()">
+                            <option selected="selected">inject</option>
+                            <option>extract</option>
+                        </select>
+                        <small class="form-text text-muted">Select modus for CCgen configuration</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="d-flex" id="configform">
+            <div class="w-33 p-2" style="background-color: #b1dae6; border-right: 1px outset #333;">
+                <h5>Config & Files</h5>
+                <div class="form-group">
+                    <label for="configinput">Input file</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control" id="configinput" onchange="setInput(this)"
+                            placeholder="Enter path to input file (.pcap)" required>
+                        <small class="form-text text-muted">Input file with .pcap extension</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="configoutput">Output file</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control" id="configoutput" onchange="setOutput(this)"
+                            placeholder="Enter path to save output file" required>
+                        <small class="form-text text-muted">Output file path with .pcap extension</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="configmessage">Covert message</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control" id="configmessage" onchange="setCovertMessage(this)"
+                            placeholder="Enter message to hide" required>
+                        <small class="form-text text-muted">This message will be injected to .pcap output
+                            file</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingmessage">Covert message [link]</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control is-valid" id="configmessagelink"
+                            onchange="setCovertMessage(this)" placeholder="Enter link to message file to hide" value="">
+                        <small class="form-text text-muted">Text of this message file will be injected</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="settingMessageSelector">Covert message type</label>
+                    <div class="d-block">
+                        <select class="form-control is-valid" id="configMessageSelector"
+                            onchange="handleMessageSelector(this.value)">
+                            <option selected="selected">text</option>
+                            <option>link</option>
+                        </select>
+                        <small class="form-text text-muted">Choose the source of the message</small>
+                    </div>
+                </div>
+            </div>
+            <div class="w-33 p-2" style="background-color: #c2dae6; border-right: 1px outset #333;">
+                <h5>Filters</h5>
+                <div class="form-group">
+                    <label for="configsrcip">Source IP Address</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control" id="configsrcip" onchange="setIpAddress(this)"
+                            placeholder="Enter IP address">
+                        <small class="form-text text-muted">Input file is filtered after that source ip
+                            address</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="configsrcport">Source Port</label>
+                    <div class="d-block">
+                        <input type="number" class="form-control is-valid" id="configsrcport" onchange="setPort(this)"
+                            value="" min="0" max="65535" step="1" placeholder="Enter port number">
+                        <small class="form-text text-muted">Input file is filtered after that source
+                            port</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="configdstip">Destination IP Address</label>
+                    <div class="d-block">
+                        <input type="text" class="form-control is-valid" id="configdstip" onchange="setIpAddress(this)"
+                            placeholder="Enter IP address">
+                        <small class="form-text text-muted">Input file is filtered after that destination ip
+                            address</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="configdstport">Destination Port</label>
+                    <div class="d-block">
+                        <input type="number" class="form-control is-valid" id="configdstport" onchange="setPort(this)"
+                            value="" min="0" max="65535" step="1" placeholder="Enter port number">
+                        <small class="form-text text-muted">Input file is filtered after that destination
+                            port</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="configproto">IP Protocol</label>
+                    <div class="d-block">
+                        <input type="number" class="form-control is-valid" id="configproto"
+                            onchange="setNullableInteger(this, -1, 256)" min="-1" max="255" step="1" value=""
+                            placeholder="Enter IP protocol number">
+                        <small class="form-text text-muted">Input file is filtered after that ip protocol
+                            number</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="filteriptableschain">IP tables chain</label>
+                    <div class="d-block">
+                        <select class="form-control is-valid" id="filteriptableschain" disabled>
+                            <option>OUTPUT</option>
+                            <option>INPUT</option>
+                        </select>
+                        <small class="form-text text-muted">Defines direction of iptables filter</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="filteriptablesqueue">IP tables queue</label>
+                    <div class="d-block">
+                        <input type="number" class="form-control is-valid" id="filteriptablesqueue"
+                            onchange="setNonNullableInteger(this, -1, 256)" value="0" min="0" max="255" step="1"
+                            placeholder="Enter IP tables queue number" required>
+                        <small class="form-text text-muted">Defines --queue-num option for NFQUEUE</small>
+                    </div>
+                </div>
+            </div>
+            <div class="w-33 p-2" style="background-color: #d3dae6;">
+                <h5>Channel & Mapping</h5>
+                <div class="mapping-area">
+                    <div class="form-group">
+                        <label>Select Mapping</label>
+                        <div class="d-block" style="width: 55%;">
+                            <select class="form-control" id="mappingSelector" onchange="handleMappingSelector()">
+                                <option selected="selected">Create new mapping</option>
+                            </select>
+                            <small class="form-text text-muted">Select from database or create new mapping</small>
+                        </div>
+                        <div style="width: 8%;">
+                            <button type="button" class="btn" onclick="deleteMapping()"><img width="20"
+                                    src="/static/imgs/trash.svg"></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mappingname">Mapping name</label>
+                        <div class="d-block">
+                            <input type="text" class="form-control" id="mappingname" onchange="setFileName(this)"
+                                placeholder="Enter name" required>
+                            <small class="form-text text-muted">Mapping name must be unique to save to
+                                database</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mappingtechnique">Technique</label>
+                        <div class="d-block">
+                            <input type="text" class="form-control" id="mappingtechnique"
+                                onchange="setMappingTechnique(this)" placeholder="Enter python script name" required>
+                            <small class="form-text text-muted">Python script name in techniques folder
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mappingbits">Bits</label>
+                        <div class="d-block">
+                            <input type="number" class="form-control is-valid" id="mappingbits"
+                                onchange="setNonNullableInteger(this, 0, 33)" min="1" step="1" max="32" value="1"
+                                required>
+                            <small class="form-text text-muted">Set size of bits per covert channel
+                                packet</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mappinglayerSelector">Layer</label>
+                        <div class="d-block">
+                            <select class="form-control is-valid" id="mappinglayerSelector">
+                                <option selected="selected">IP</option>
+                                <option>TLS</option>
+                                <option>PCAP</option>
+                            </select>
+                            <small class="form-text text-muted">Covert channel is implemented on this
+                                layer</small>
+                        </div>
+                    </div>
+                    <div id="valuemapping-area"></div>
+                    <div id="parameter-area" class="mt-3"></div>
+                </div>
+                <div class="d-flex pt-3 pb-2 justify-content-end w-100">
+                    <button type="button" class="btn btn-secondary btn-lg" onclick="addValueMapping()"
+                        id="addmapping">Specify value mapping</button>
+                    <div class="p-1"></div>
+                    <button type="button" class="btn btn-secondary btn-lg" onclick="addParameter()" id="addparams">Add
+                        parameter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="d-flex w-100 justify-content-end p-3 pt-0">
+        <p class="mt-3">Save as new config</p>
+        <div style="width: 0.5%;"></div>
+        <input type="checkbox" id="saveAsNewConfig" onclick="saveNewConfig(this)">
+        <div class="w-2"></div>
+        <button type="button" class="btn btn-primary btn-lg" onclick="validateConfig()"
+            id="validateconfig">Validate</button>
+    </div>
+    <div class="modal" id="configsummary" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Config summary</h5>
+                    <button type="button" class="close" onclick="closeModal()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Edit</button>
+                    <button type="button" class="btn btn-secondary" id="wrapperBtn" onclick="wrapConfig()">Add to
+                        wrapper</button>
+                    <button type="submit" class="btn btn-primary" onclick="sendConfig()">Save config & queue
+                        simulation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
