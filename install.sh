@@ -57,7 +57,7 @@ FILE=$INSTALL_DIR/ccgen/data/ccgen_data.db
 if [ -f "$FILE" ]; then
     echo "$FILE exists."
 else
-    mv $INSTALL_DIR/ccgen/data/ccgen_data_default.db $INSTALL_DIR/ccgen/data/ccgen_data.db
+    cp $INSTALL_DIR/ccgen/data/ccgen_data_default.db $INSTALL_DIR/ccgen/data/ccgen_data.db
 fi
 
 #finished
