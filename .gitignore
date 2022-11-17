@@ -2,6 +2,7 @@ ccgen/__pycache__/
 ccgen/data/ccgen_data.db
 ccgen/util/__pycache__/
 ccgen/wrapper/__pycache__/
+ccgen/wrapper/temp/
 listener/__pycache__/
 listener/listener.ini
 messages/
