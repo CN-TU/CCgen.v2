@@ -1,4 +1,4 @@
-import os
+import os, re
 from pathlib import Path
 
 OUT_FOLDER = str(Path(__file__).parent.parent.parent.absolute()) + "/out"
@@ -38,6 +38,7 @@ def getMessageFromFile(message_file):
     return message
 
 def text2bin(text):
+    if re.match("^[01]+$", text.strip()): return text.strip()
     arrC = list(text)
     sym = list(map(lambda a: ord(a), arrC))
     sbi = list(map(lambda a: '{:08b}'.format(a), sym))

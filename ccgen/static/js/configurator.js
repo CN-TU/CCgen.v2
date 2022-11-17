@@ -44,7 +44,7 @@ $(document).ready(function () {
     direction = window.localStorage.getItem('direction');    
     if (direction) $('#modusDirectionSelector').val(direction).trigger('change');
     else $('#modusDirectionSelector').val("inject").trigger('change');
-    handleMessageSelector("text");
+    if (direction == "inject") handleMessageSelector("text");
 });
 
 /* -------------- VALIDATIONS -------------- */

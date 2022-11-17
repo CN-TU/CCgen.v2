@@ -1,4 +1,4 @@
-CUR_KEY_DIR=$(pwd)/.vagrant/machines/default/virtualbox
+CUR_KEY_DIR=$(pwd)/../.vagrant/machines/default/virtualbox
 KEY_DIR=$HOME/vagrant_keys
 
 if [ ! -d "$KEY_DIR" ]; then
