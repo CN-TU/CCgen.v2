@@ -4,7 +4,7 @@
 - *Nov 2021, FIV*
 - *Sep 2022, KM*
 
-CCgen.v2 is the refactorized version of CCgen.v1 refined and developed by Kaspar Meusburger.
+CCgen.v2 is the refactorized version of CCgen.v1 refined and developed by KM.
 
 
 ## Citation
