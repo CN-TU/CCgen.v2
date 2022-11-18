@@ -1,5 +1,4 @@
-from scapy.layers.inet import IP, TCP, UDP
-from scapy.packet import raw
+from scapy.layers.inet import TCP
 
 class CovertChannel():
 	def __init__(self, online, config, message):

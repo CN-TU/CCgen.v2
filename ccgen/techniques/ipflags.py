@@ -1,6 +1,5 @@
 from scapy.layers.inet import IP
 
-
 class CovertChannel():
 	def __init__(self, online, config, message):
 		pass

@@ -1,6 +1,6 @@
 import random
 from time import sleep
-"in",
+
 class CovertChannel():
     def __init__(self, online, config, message):
         self._online = online
