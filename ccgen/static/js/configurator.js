@@ -575,7 +575,7 @@ function validateConfig() {
     config.input_file = $('#configinput').val() ? $('#configinput').val() : null;
     config.output_file = $('#configoutput').val() ? $('#configoutput').val() : null;
     if (config.direction == "inject") {
-        if (!config.hasOwnProperty('message')) config.message = {};
+        if (!config.hasOwnProperty('message') || config.message == null) config.message = {};
         if (!config.message.hasOwnProperty('id')) config.message.id = '';
         config.message.message = $('#configmessage').val() ? $('#configmessage').val() : null;
         config.message.message_link = $('#configmessagelink').val() ? $('#configmessagelink').val() : null;
