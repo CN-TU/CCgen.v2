@@ -58,7 +58,6 @@ def process_online_send(config):
         datagram = config.message.getdatagram()
         if not datagram: return True
         mappedvalue = config.mapping.getmapping(datagram)
-        # check if there is a value to map otherwise skip packet
         if mappedvalue:
             config.technique.modify(pkt, mappedvalue, params)
 
@@ -115,11 +114,12 @@ def process_offline_send(config):
                     modified_frames += 1
                     if config.layer == 'IP' and not 'pIAT' in params:
                         config.technique.modify(frame[IP], mappedvalue, params)
-                    #elif config.layer == 'PCAP':
                     else:
-                        config.technique.modify(frame, mappedvalue, params)
+                        frame = config.technique.modify(frame, mappedvalue, params)
 
                     # Recalculate checksums
+                    if not frame: continue
+
                     if frame.haslayer(TCP):
                         del frame[TCP].chksum
                     if frame.haslayer(UDP):
@@ -141,13 +141,15 @@ def process_offline_receive(config):
                 checked_frames = checked_frames + 1
                 if config.layer == 'IP' and not 'pIAT' in params:
                     mappedvalue = config.technique.extract(frame[IP], params)
-                #elif config.layer == 'PCAP':
                 else:
                     mappedvalue = config.technique.extract(frame, params)
                 if mappedvalue is None:
                     continue
                 try:
-                    data = config.mapping.getdata(str(mappedvalue))
+                    data = ""
+                    if 'pIAT' in params:
+                        for value in mappedvalue: data += config.mapping.getdata(str(value))
+                    else: data = config.mapping.getdata(str(mappedvalue))
                     outfile.write(data)
                 except:
                     pass

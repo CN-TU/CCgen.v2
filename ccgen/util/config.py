@@ -42,6 +42,7 @@ def parse_config(configfile, user_message, direction, network):
     print("  input_file: ", configfile.input_file)
     print("  output_file: ", configfile.output_file)
     print("  mapping: ", configfile.mapping.name)
+    if direction == "inject": print("  message: ", user_message)
 
     print("\n[FILTER]")
     print("  src_ip: ", configfile.src_ip)
@@ -55,13 +56,12 @@ def parse_config(configfile, user_message, direction, network):
         print("\n")
 
 
-    #load technique
+    #prepare technique, mapping, message, covertchannel
     technique = TECHNIQUE_FOLDER + "/" + configfile.mapping.technique
     exec(compile(open(technique, "rb").read(), technique, 'exec'), globals())
-
-    message = None
-    if user_message: message = Message(user_message, configfile.mapping.bits)
     mapping = Mapping(configfile.mapping)
+    message = None
+    if user_message: message = Message(user_message, configfile.mapping.bits, mapping.getparams())    
     covertchannel = CovertChannel(0 if network == NETWORK_OFFLINE else 1, configfile, message.message if direction == DIRECTION_SEND else None)
 
     return Config(

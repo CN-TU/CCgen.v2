@@ -88,7 +88,7 @@ def isParameterNameInTechnique():
   technique = request.args.get('technique')
   if not technique: return getJsonString(False)
   param_name = request.args.get('parameter_name')
-  if param_name == "pIAT": return getJsonString(True)
+  if param_name == "pIAT" or param_name == "pSB": return getJsonString(True)
   technique_path = util.helper.TECHNIQUE_FOLDER + "/" + str(request.args.get('technique')) 
   with open(technique_path) as f:
     if "params['" + param_name + "']" in f.read():
