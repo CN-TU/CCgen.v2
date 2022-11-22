@@ -47,7 +47,6 @@ function setPattern(elem) {
 function setNumberOrRange(elem) {    
     if (!elem.value) return;
     var data = null;
-    console.log(elem.value)
     if (elem.value.includes("-")) {
         var numbers = elem.value.split("-");
         numbers.forEach(function (n) {
@@ -287,7 +286,7 @@ function createInstruction(instruction, no) {
         'id="deleteInstructionBtn" onclick="deleteInstruction(this)"><img width="15" src="/static/imgs/trash.svg"></button></div></div></div>');
 
     var instruction_div = $('#instructions').children().eq(parseInt(no)-1)[0];
-    if (instruction) {        
+    if (instruction && instruction_div) {        
         $(instruction_div.children[1].children[1]).val(instruction.mode).trigger('change');
         $(instruction_div.children[2].children[1]).val(instruction.src_ip).trigger('change');
         $(instruction_div.children[3].children[1]).val(instruction.src_port).trigger('change');
