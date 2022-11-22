@@ -44,18 +44,28 @@ function setPattern(elem) {
     inputCallback(data, elem);
 }
 
-function setNumberOrRange(elem) {
+function setNumberOrRange(elem) {    
+    if (!elem.value) return;
     var data = null;
+    console.log(elem.value)
     if (elem.value.includes("-")) {
         var numbers = elem.value.split("-");
         numbers.forEach(function (n) {
-            if (!parseInt(n)) data = false;
+            if (elem.id == "instructionduration") {
+                if (isNaN(n) || parseFloat(n) < 0) data = false;
+            } else {
+                if (!(/^\+?(0|[1-9]\d*)$/.test(n))) data = false; 
+            }
         });
-        if (data == null) data = true;
+        
     } else {
-        data = false;
-        if (/^\+?(0|[1-9]\d*)$/.test(elem.value)) data = true;
+        if (elem.id == "instructionduration") {
+            if (isNaN(elem.value) || parseFloat(elem.value) < 0) data = false;
+        } else {
+            if (!(/^\+?(0|[1-9]\d*)$/.test(elem.value))) data = false; 
+        }           
     }
+    if (data == null) data = true;
     inputCallback(data, elem);
 }
 
