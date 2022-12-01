@@ -13,11 +13,10 @@ class CovertChannel():
         elif mappedvalue == "1":
             if self._timebuffer > 0:
                 self._lasttime += self._timebuffer
-                pkt.time = self._lasttime
                 self._timebuffer = 0
             elif (self._lasttime - pkt.time) > (float(params['pTw']) * 0.9):
                 self._lasttime += (float(params['pTw']) * 0.2) #change pkt.time to 20% of the t_wait parameter
-                pkt.time = self._lasttime        
+        if pkt: pkt.time = self._lasttime        
         return pkt
 
     def extract (self, pkt, params):

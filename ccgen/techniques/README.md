@@ -250,7 +250,40 @@ The technique proposed by Shah et al. [[16]](#references) is designed to interfe
     - *pIAT* (use of IATs)
     - *pw2* (half time interval)
     - *pmask* (scale-mask to keep residual original time)
+    - *prdx* (integer determining the randomness of IDT values, the greater the number the greater the randomness)
 
+#### ZAN (#19)
+
+- Config: *timing_zan*
+- Mapping: *mapping_timing_zan*
+- Bits: 1
+- Parameters: 
+    - *pIAT* (use of IATs)
+    - *pmask* (scale-mask to keep residual original time)
+    - *pTb* (float giving the base time between packets)
+    - *pTinc* (incrementing value beeing subtracted or added to base time)
+
+#### ZAN2 (#20)
+
+- Config: *timing_zan2*
+- Mapping: *mapping_timing_zan2*
+- Bits: 1
+- Parameters: 
+    - *pIAT* (use of IATs)
+    - *pmask* (scale-mask to keep residual original time)
+    - *pA* (time constant A)
+    - *pB* (time constant B)
+    - *pC* (time constant C)
+
+#### ED1 (#21)
+
+- Config: *timing_ed1*
+- Mapping: *mapping_timing_ed1*
+- Bits: 1
+- Parameters: 
+    - *pIAT* (use of IATs)
+    - *pSB* (start bit added to the beginning of message)
+    - *pTw* (waiting time if 0 occurs)
 
 ## References
 

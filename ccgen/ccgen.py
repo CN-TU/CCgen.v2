@@ -147,7 +147,7 @@ def process_offline_receive(config):
                     continue
                 try:
                     data = ""
-                    if 'pIAT' in params:
+                    if 'pIAT' in params and isinstance(mappedvalue, str):
                         for value in mappedvalue: data += config.mapping.getdata(str(value))
                     else: data = config.mapping.getdata(str(mappedvalue))
                     outfile.write(data)
