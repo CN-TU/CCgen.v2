@@ -2,8 +2,9 @@ ccgen/__pycache__/
 ccgen/data/ccgen_data.db
 ccgen/util/__pycache__/
 ccgen/wrapper/__pycache__/
-ccgen/wrapper/temp/
 ccgen/wrapper/go-flows-master/
+ccgen/wrapper/temp/
+configs/
 listener/__pycache__/
 listener/listener.ini
 messages/
