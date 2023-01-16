@@ -1,13 +1,27 @@
 var last_id = null;
-var config = {};
-var setting = {};
-var settingFields = new Array(9).fill(false);
-var configs = [];
-var mappings = [];
-var wrapper = {};
 var goflows = false;
 
+var configs = [];
+var mappings = [];
+var settings = [];
+
+var setting = {};
+var config = {};
+var wrapper = {};
+
 $(document).ready(function () {
+    init();      
+});
+
+async function accumulateData() {
+    await isSuperUser();
+    await hasGoFlowsInstalled(); 
+    await getSettings();  
+    await getConfigs();
+    await getMappings();
+}
+
+async function getConfigs() {
     $.get("/getConfigs", function (data) {
         configs = JSON.parse(data);
         configs.forEach(function (c) {
@@ -17,6 +31,9 @@ $(document).ready(function () {
             }));
         });
     });
+}
+
+async function getMappings() {
     $.get("/getMappings", function (data) {
         mappings = JSON.parse(data);
         mappings.forEach(function (m) {
@@ -26,28 +43,61 @@ $(document).ready(function () {
             }));
         });
     });
+}
+
+async function getSettings() {
+    var data = await $.get("/getSettings").then();
+    var sets = JSON.parse(data);
+    for (var i = 0; i < sets.length; i++) {
+        if (sets[i].active) settings.push(sets[i]);
+    }
+}
+
+async function isSuperUser() {
     $.get("isSuperUser", function (data) {
         var isSuperUser = JSON.parse(data);
-        if (isSuperUser) {
-            network = window.localStorage.getItem('network');
-            if (network) $('#modusNetworkSelector').val(network).trigger('change');
-            else $('#modusNetworkSelector').val("offline").trigger('change');
-        } else {
-            $('#modusNetworkSelector')[0].remove(1);
-            $('#modusNetworkSelector').val("offline").trigger('change');
-        }
+        if (!isSuperUser) $('#modusNetworkSelector')[0].remove(1);
     });
+}
+
+async function hasGoFlowsInstalled() {
     $.get("hasGoFlowsInstalled", function (data) {
         goflows = JSON.parse(data);
     });
-    
-    network = window.localStorage.getItem('network');
-    if (!network) $('#modusNetworkSelector').val("offline").trigger('change'); 
-    direction = window.localStorage.getItem('direction');    
-    if (direction) $('#modusDirectionSelector').val(direction).trigger('change');
-    else $('#modusDirectionSelector').val("inject").trigger('change');
-    if (direction == "inject") handleMessageSelector("text");
-});
+}
+
+async function init() {
+    await accumulateData();
+
+    var config_interface = localStorage.getItem("config");
+    if (config_interface) {
+        //config from interface
+        var data = JSON.parse(config_interface);
+        if (data.hasOwnProperty('configs')) {
+            //wrapper config
+            //TODO
+        } else {
+            //single config
+            $('#modusDirectionSelector').val(data.direction).trigger('change');
+            $('#modusNetworkSelector').val(data.network).trigger('change');
+
+            fillConfig(data);
+        }
+        localStorage.setItem("config", "");
+    } else {
+        //default init
+        var network = window.localStorage.getItem('network');
+        if (network && !isSuperUser) $('#modusNetworkSelector').val(network);
+        else $('#modusNetworkSelector').val("offline");
+        
+        var direction = window.localStorage.getItem('direction');
+        if (direction) $('#modusDirectionSelector').val(direction);
+        else $('#modusDirectionSelector').val("inject");
+
+        handleNetworkSelector();
+        handleDirectionSelector();
+    }
+}
 
 /* -------------- VALIDATIONS -------------- */
 function setFileName(elem) {
@@ -55,7 +105,7 @@ function setFileName(elem) {
     var message = "";
     if (elem.id == "configname") {
         if ($('#saveAsNewConfig').is(':checked') || !config.id) {
-            $.get("/isConfigNameUnique", { 'name': elem.value, 'class' : "Config" }, function (response) {
+            $.get("/isConfigNameUnique", { 'name': elem.value, 'class': "Config" }, function (response) {
                 data = JSON.parse(response);
                 if (!data) message = "A config with the same name already exists!";
                 inputCallback(data, elem, message);
@@ -76,11 +126,6 @@ function setInput(elem) {
         if (!data) message = "Check input path. Could not find input file!";
         else if (extension != "pcap") message = "Invalid input file. Input file needs to be a '.pcap' file!";
 
-        if (settingFields[0] && !data && elem.value != setting.input_file && setting.input_file) {
-            elem.value = setting.input_file;
-            settingFields[0] = false;
-            setInput(elem);            
-        } else settingFields[0] = false;
         inputCallback(data, elem, message);
     });
 }
@@ -94,35 +139,20 @@ function setOutput(elem) {
         $.get("/isOutputFileValid", { 'path': elem.value }, function (response) {
             data = JSON.parse(response);
             if (!data) message = "Check output path. Could not find folder of output path!";
-            if (settingFields[1] && !data && elem.value != setting.output_file && setting.output_file) {
-                elem.value = setting.output_file;
-                settingFields[1] = false;
-                setOutput(elem);
-            } else settingFields[1] = false;
             inputCallback(data, elem, message);
         });
-    } else if ($('#modusDirectionSelector').val() == "extract" && extension == "txt") {
+    } else if ($('#modusDirectionSelector').val() == "extract" && ['txt', 'zip', 'csv'].includes(extension)) {
         $.get("/isOutputFileValid", { 'path': elem.value }, function (response) {
             data = JSON.parse(response);
             if (!data) message = "Check output path. Could not find folder of output path!";
-            if (settingFields[1] && !data && elem.value != setting.output_file && setting.output_file) {
-                elem.value = setting.output_file;
-                settingFields[1] = false;
-                setOutput(elem);                
-            } else settingFields[1] = false;
             inputCallback(data, elem, message);
         });
     } else {
         if ($('#modusDirectionSelector').val() == "inject") {
             if (extension != "pcap") message = "Invalid output file. Output file needs to be a '.pcap' file!";
         } else if ($('#modusDirectionSelector').val() == "extract") {
-            if (extension != "txt") message = "Invalid output file. Output file needs to be a '.txt' file!";
+            if (!['txt', 'zip', 'csv'].includes(extension)) message = "Invalid output file. Output file needs to be a '.txt', '.zip' or '.csv' file!";
         }
-        if (settingFields[1] && !data && elem.value != setting.output_file && setting.output_file) {
-            elem.value = setting.output_file;
-            settingFields[1] = false;
-            setOutput(elem);
-        } else settingFields[1] = false;
         inputCallback(false, elem, message);
     }
 }
@@ -133,17 +163,13 @@ function setCovertMessage(elem) {
     var data = false;
     if (elem.id == "configmessage" && $('#configMessageSelector').val() == "text") {
         if (elem.value && ascii_regex.test(elem.value)) data = true;
-        else message = "Invalid characters detected. Only ASCII characters are allowed"
-        if (settingFields[2] && !data && elem.value != setting.message) {
-            elem.value = setting.message;
-            settingFields[2] = false;
-            setCovertMessage(elem);        
-        } else settingFields[2] = false;
+        else message = "Invalid characters detected. Only ASCII characters are allowed";
         inputCallback(data, elem, message);
     } else if (elem.id == "configmessagelink" && $('#configMessageSelector').val() == "link") {
         var extension = elem.value.split('.').pop();
-        if (extension != "txt") inputCallback(false, elem, "File must be of type '.txt'!")
-        else {
+        if (!['txt', 'zip', 'csv'].includes(extension)) {
+            inputCallback(false, elem, "File must be either of type '.txt', '.csv' or '.zip'!");
+        } else {
             $.get("/isInputFileValid", { 'path': elem.value }, function (response) {
                 data = JSON.parse(response);
                 if (!data) message = "File does not exist! Check file path again";
@@ -161,20 +187,7 @@ function setIpAddress(elem) {
         if (ipv4_regex.test(elem.value)) data = true;
         else message = "Invalid ip address! Enter IPv4 address.";
     }
-    if (elem.id == "configsrcip") {
-        if (settingFields[3] && !data && elem.value != setting.src_ip && setting.src_ip) {
-            elem.value = setting.src_ip;
-            settingFields[3] = false;
-            setIpAddress(elem);            
-        } else settingFields[3] = false;
-    }
-    else if (elem.id == "configdstip") {
-        if (settingFields[4] && !data && elem.value != setting.dst_ip && setting.dst_ip) {
-            elem.value = setting.dst_ip;
-            settingFields[4] = false;
-            setIpAddress(elem);      
-        } else settingFields[4] = false;
-    }
+
     inputCallback(data, elem, message);
 }
 
@@ -186,16 +199,7 @@ function setPort(elem) {
     if (Number.isInteger(number) && number >= 0 && number < 65536) data = true;
     if (elem.value == 0) elem.value = null;
     if (!data) message = "Invalid input. Number must be integer, greater than 0 and smaller than 65536! Set field to null by entering 0!";
-    if (elem.id == "configsrcport" && settingFields[5] && !data && elem.value != setting.src_port && setting.src_port) {
-        elem.value = setting.src_port;
-        settingFields[5] = false;
-        setPort(elem);
-    } else settingFields[5] = false;
-    if (elem.id == "configdstport" && settingFields[6] && !data && elem.value != setting.dst_port && setting.dst_port) {
-        elem.value = setting.dst_port;
-        settingFields[6] = false;
-        setPort(elem);                  
-    } else settingFields[6] = false;
+
     inputCallback(data, elem, message);
 }
 
@@ -207,12 +211,8 @@ function setNullableInteger(elem, lower, upper) {
     if (Number.isInteger(number) && number >= lower && number < upper) data = true;
     if (elem.value == -1) elem.value = null;
     if (!data) message = "Invalid input. Number must be integer, greater than " + (lower + 1).toString() + " and smaller than " + upper.toString() + "! Set field to null by entering -1!";
-    if (elem.id == "configproto" && settingFields[7] && !data && elem.value != setting.proto && setting.proto) {
-        elem.value = setting.proto;
-        settingFields[7] = false;
-        setNonNullableInteger(elem);
-    } else settingFields[7] = false;
-    inputCallback(data, elem, "");
+
+    inputCallback(data, elem, message);
 }
 
 function setMappingTechnique(elem) {
@@ -233,11 +233,7 @@ function setNonNullableInteger(elem, lower, upper) {
     var bits = parseFloat(elem.value);
     if (Number.isInteger(bits) && bits > lower && bits < upper) data = true;
     if (!data) message = "Invalid input. Number must be integer, greater than " + lower.toString() + " and smaller than " + upper.toString() + "!";
-    if (elem.id == "filteriptablesqueue" && settingFields[8] && !data && elem.value != setting.iptables_queue && setting.iptables_queue) {
-        elem.value = setting.iptables_queue;
-        settingFields[8] = false;
-        setNonNullableInteger(elem);     
-    } else settingFields[8] = false;
+
     inputCallback(data, elem, message);
 }
 
@@ -298,7 +294,7 @@ let bit_regex = /^[0-1]*$/;
 /* --------------- SELECTORS --------------- */
 
 function handleConfigSelector() {
-    //reset form
+    //reset config
     $(':input', '#configform')
         .not('select, :button, :submit, :reset, :hidden')
         .val(null)
@@ -307,7 +303,6 @@ function handleConfigSelector() {
         .prop('checked', false)
         .prop('selected', false);
 
-    config = {};
     last_id = null;
 
     $('#configsrcport').addClass('is-valid');
@@ -320,44 +315,8 @@ function handleConfigSelector() {
     $('#parameter-area').html('');
 
     var selected = $("#configSelector").val();
-    var direction = $('#modusDirectionSelector').val();
-    if (selected != "Create new config") {
-        //handle selected config
-        settingFields = new Array(9).fill(true);
-        c = configs.filter(con => con.id == selected)[0];
-        config = c;
-        $('#configname').val(c.name).trigger('change');
-        $('#configinput').val(c.input_file).trigger('change');
-        $('#configoutput').val(c.output_file).trigger('change');
-        if (direction == "inject" && setting.message) {
-            $('#configmessage').val(setting.message.message).trigger('change');
-            $('#configmessagelink').val(setting.message.message_link).trigger('change');
-            $('#configMessageSelector').val(setting.message.active).trigger('change');
-        }
-        $('#configsrcip').val(c.src_ip).trigger('change');
-        $('#configsrcport').val(c.src_port).trigger('change');
-        $('#configdstip').val(c.dst_ip).trigger('change');
-        $('#configdstport').val(c.dst_port).trigger('change');
-        $('#configproto').val(c.proto).trigger('change');
-        $('#filteriptablesqueue').val(c.iptables_queue).trigger('change');
-        if (config.mapping && config.mapping.id) $('#mappingSelector').val(c.mapping.id).trigger('change');
-        else $('#mappingSelector').val('Create new mapping').trigger('change');
-    } else if (setting.id) {
-        //handle new config
-        $('#configinput').val(setting.input_file).trigger('change');
-        $('#configoutput').val(setting.output_file).trigger('change');
-        $('#configsrcip').val(setting.src_ip).trigger('change');
-        $('#configsrcport').val(setting.src_port).trigger('change');
-        $('#configdstip').val(setting.dst_ip).trigger('change');
-        $('#configdstport').val(setting.dst_port).trigger('change');
-        $('#configproto').val(setting.proto).trigger('change');
-        $('#filteriptablesqueue').val(setting.iptables_queue).trigger('change');
-        if (direction == "inject") {
-            $('#configmessage').val(setting.message.message).trigger('change');
-            $('#configmessagelink').val(setting.message.message_link).trigger('change');
-            $('#configMessageSelector').val(setting.message.active).trigger('change');
-        }
-    }
+    if (selected != "Create new config") fillConfig(configs.filter(con => con.id == selected)[0]);
+    else fillConfig(null);
 }
 
 function handleNetworkSelector() {
@@ -390,9 +349,8 @@ function handleNetworkSelector() {
         $('#configproto')[0].parentElement.children[1].innerHTML = "Input file is filtered after that ip protocol number";
         $('#configmessage')[0].parentElement.children[1].innerHTML = "This message will be injected to .pcap output file";
     }
-    settingFields = new Array(9).fill(true);
     window.localStorage.setItem('network', selected)
-    setSetting(true);
+    setSetting();
 }
 
 function handleDirectionSelector() {
@@ -416,12 +374,12 @@ function handleDirectionSelector() {
         $('#configmessage').val(null).trigger('change');
         if (network == "online") $('#filteriptableschain').val("INPUT").trigger('change');
     }
-    settingFields = new Array(9).fill(true);
     window.localStorage.setItem('direction', selected);
-    setSetting(true);
+    setSetting();
 }
 
 function handleMappingSelector() {
+    //reset mapping
     $(':input', '.mapping-area')
         .not('select, :button, :submit, :reset, :hidden')
         .val(null)
@@ -433,27 +391,10 @@ function handleMappingSelector() {
     $('#mappingbits').val('1').trigger('change');
     $('#valuemapping-area').html('');
     $('#parameter-area').html('');
-    config.mapping = {};
 
     var selected = document.getElementById("mappingSelector").value;
-    if (selected != "Create new mapping") {
-        mapping = mappings.filter(m => m.id == selected)[0];
-        config.mapping = mapping;
-        $('#mappingname').val(mapping.name).trigger('change');
-        $('#mappingtechnique').val(mapping.technique).trigger('change');
-        $('#mappingbits').val(mapping.bits).trigger('change');
-        $('#mappinglayerSelector').val(mapping.layer).trigger('change');
-        numberOfValueMappings = 1;
-        mapping.valuemappings.forEach(function (vm) {
-            addMappingDetail('#valuemapping-area', vm.id, vm.data_from, vm.symbol_to, "Value mapping " + numberOfValueMappings.toString(), "is-valid");
-            numberOfValueMappings++;
-        });
-        numberOfParameters = 1;
-        mapping.parameters.forEach(function (param) {
-            addMappingDetail('#parameter-area', param.id, param.name, param.value, "Parameter " + numberOfParameters.toString(), "is-valid");
-            numberOfParameters++;
-        });
-    }
+    if (selected != "Create new mapping") fillMapping(mappings.filter(m => m.id == selected)[0]);
+    else fillMapping(null);
 }
 
 function handleConstraintsSelector(elem) {
@@ -465,10 +406,13 @@ function handleMessageSelector(active) {
     if (active == "text") {
         $($('#configmessage')[0].parentElement.parentElement).show();
         $($('#configmessagelink')[0].parentElement.parentElement).hide();
+        setCovertMessage($('#configmessage')[0]);
     } else {
         $($('#configmessagelink')[0].parentElement.parentElement).show();
         $($('#configmessage')[0].parentElement.parentElement).hide();
+        setCovertMessage($('#configmessagelink')[0]);
     }
+    
 }
 
 /* ------------- END SELECTORS ------------- */
@@ -557,7 +501,7 @@ function deleteMappingItem(elem) {
 function validateConfig() {
     //validate inputs
     var allinputscorrect = true;
-    $('.form-control').each(function() {
+    $('.form-control').each(function () {
         if ($(this)[0].localName == "input" && $(this).is(':visible') && !$(this).hasClass('is-valid')) {
             var message = "Please fill out this field.";
             inputCallback(false, $(this)[0], message);
@@ -639,7 +583,7 @@ function validateConfig() {
     $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Destination IP Address:&nbsp;</b></p><p class="text-left"> ' + config['dst_ip'] + '</p></div>');
     $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Destination Port:&nbsp;</b></p><p class="text-left"> ' + config['dst_port'] + '</p></div>');
     $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Protocol:&nbsp;</b></p><p class="text-left"> ' + config['proto'] + '</p></div>');
-    if (config.network == "online")$('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>IP tables chain:&nbsp;</b></p><p class="text-left"> ' + config['iptables_chain'] + '</p></div>');
+    if (config.network == "online") $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>IP tables chain:&nbsp;</b></p><p class="text-left"> ' + config['iptables_chain'] + '</p></div>');
     if (config.network == "online") $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>IP tables queue:&nbsp;</b></p><p class="text-left"> ' + config['iptables_queue'] + '</p></div>');
     $('.modal-body').append('<div class="d-flex mt-2 mb-1"><b>[Channel & Mapping]</b></div>');
     $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Id:&nbsp;</b></p><p class="text-left"> ' + config['mapping']['id'] + '</p></div>');
@@ -670,7 +614,7 @@ function wrapConfig() {
         $('#wrapper-area').css('display', 'block');
         $('#wrapperinput').val(config.input_file).trigger('change');
         $('#wrapperoutput').val(config.output_file).trigger('change');
-    }    
+    }
     addConfig();
 }
 
@@ -694,9 +638,10 @@ function validateWrapper() {
     wrapper.output_file = $('#wrapperoutput').val();
     var wrapper_configs = document.getElementById('wrapper-body').children;
     for (var i = 0; i < wrapper.configs.length; i++) {
-        wrapper.configs[i].flowkey = wrapper_configs[i].children[4].children[0].value;
-        wrapper.configs[i].constraints = wrapper_configs[i].children[5].children[0].value;
-        wrapper.configs[i].repetition = parseInt(wrapper_configs[i].children[6].children[0].value);
+        wrapper.configs[i].flowkey = wrapper_configs[i].children[5].children[0].value;
+        wrapper.configs[i].constraints = wrapper_configs[i].children[6].children[0].value;
+        wrapper.configs[i].repetition = parseInt(wrapper_configs[i].children[7].children[0].value);
+        wrapper.configs[i].outfiletype = wrapper_configs[i].children[4].children[0].value;
     }
 
     //open summary in modal
@@ -705,10 +650,11 @@ function validateWrapper() {
     $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Input file:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper['input_file'] + '</p></div>');
     $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Output file:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper['output_file'] + '</p></div>');
     for (var i = 0; i < wrapper['configs'].length; i++) {
-        $('.modal-body').append('<div class="d-flex mt-2 mb-1"><b>[Config ' + (i+1).toString() + ']</b></div>');
+        $('.modal-body').append('<div class="d-flex mt-2 mb-1"><b>[Config ' + (i + 1).toString() + ']</b></div>');
         $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Message type:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper.configs[i]['message']['active'] + '</p></div>');
         if (wrapper['configs'][i].message.active == "text") $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Message:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper.configs[i]['message']['message'] + '</p></div>');
         else if (wrapper['configs'][i].message.active == "link") $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Message:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper.configs[i]['message']['message_link'] + '</p></div>');
+        $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Outfile type:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper.configs[i]['outfiletype'] + '</p></div>');
         $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Flow key:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper.configs[i]['flowkey'] + '</p></div>');
         $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Constraints:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper.configs[i]['constraints'] + '</p></div>');
         $('.modal-body').append('<div class="d-flex"><p class="w-30 text-left"><b>Repetition:&nbsp;</b></p><p class="text-left w-50"> ' + wrapper.configs[i]['repetition'].toString() + '</p></div>');
@@ -732,7 +678,7 @@ function validateWrapper() {
                 '</p></div><div class="d-flex w-15"><p class="text-left"><b>Value:</b> ' + wrapper.configs[i]['mapping']['parameters'][j]['value'] +
                 '</p></div></div>');
         }
-    }        
+    }
 }
 
 function sendConfig() {
@@ -760,26 +706,30 @@ function closeModal() {
 
 function removeWrappedConfig(elem) {
     var idx = parseInt(elem.parentElement.parentElement.parentElement.children[0].innerHTML);
-    $('#wrapper-body').children().eq(parseInt(idx)-1).remove();
-    wrapper.configs.splice(idx-1, 1);
+    $('#wrapper-body').children().eq(parseInt(idx) - 1).remove();
+    wrapper.configs.splice(idx - 1, 1);
     if (wrapper.configs.length < 1) $('#wrapper-area').css('display', 'none');
     else {
         var wcs = document.getElementById('wrapper-body').children;
-        for(var i = 0; i < wcs.length; i++) {
-            wcs[i].children[0].innerHTML = ((i+1).toString());
+        for (var i = 0; i < wcs.length; i++) {
+            wcs[i].children[0].innerHTML = ((i + 1).toString());
         }
     }
 }
 
-/* -------------- END BUTTONS -------------- */ 
+/* -------------- END BUTTONS -------------- */
 
 /* -------------- HELPER FUNC -------------- */
 
-function setSetting(reload) {
-    $.get("/getSetting", { 'network': $('#modusNetworkSelector').val(), 'direction': $('#modusDirectionSelector').val() }, function (data) {
-        setting = JSON.parse(data);
-        if (reload) $('#configSelector').val($('#configSelector').val()).trigger("change");
-    });
+function setSetting() {
+    var network = $('#modusNetworkSelector').val();
+    var direction = $('#modusDirectionSelector').val();
+
+    var set = settings.filter(s => s.active && s.direction == direction && s.network == network)[0];
+    if (set) {
+        setting = set;
+        fillConfig(null);
+    }
 }
 
 function addMappingDetail(section, id, value1, value2, name, isValid) {
@@ -806,16 +756,17 @@ function saveNewConfig(elem) {
 }
 
 function addConfig() {
-    wrapper.configs.push(config);
+    wrapper.configs.push(JSON.parse(JSON.stringify(config)));
     var message = config.message.message;
     if (config.message.active == "link") message = config.message.message_link;
-    var tablerow = '<tr class="clickable-row">' + 
+    var tablerow = '<tr class="clickable-row">' +
         '<th scope="row">' + (wrapper.configs.length).toString() + '</th>' +
         '<td>' + config.mapping.name + '</td>' +
         '<td>' + config.mapping.technique + '</td>' +
         '<td>' + message + '</td>' +
+        '<td><select class="form-control is-valid"><option selected="selected">txt</option><option>csv</option><option>zip</option></select></td>' +
         '<td><select class="form-control is-valid"><option selected="selected">1tup</option><option>2tup</option><option>3tup</option>' +
-        '<option>4tup</option><option>5tup</option></select></td>' + 
+        '<option>4tup</option><option>5tup</option></select></td>' +
         '<td><select class="form-control is-valid" onchange="handleConstraintsSelector(this)"><option selected="selected">None</option><option>tcp</option><option>udp</option>' +
         '<option>tcp/udp</option><option>tls</option></select></td>' +
         '<td><input type="number" class="form-control is-valid" onchange="setNonNullableInteger(this, 0, 33)" min="1" step="1" max="32" value="1"required></td>' +
@@ -823,5 +774,90 @@ function addConfig() {
         '<button type="button" class="btn btn-close mr-2" title="Remove wrapped config" onclick="removeWrappedConfig(this)"></button>' +
         '</div></td></tr>';
     $('#wrapper-body').append(tablerow);
+}
+
+function fillConfig(data) {
+    config = {
+        id: null,
+        name: "",
+        input_file: "",
+        output_file: "",
+        network: $('#modusNetworkSelector').val(),
+        direction: $('#modusDirectionSelector').val(),
+        message: null,
+        mapping: null,
+        proto: null,
+        src_ip: null,
+        src_port: null,
+        dst_ip: null,
+        dst_port: null,
+        iptables_chain: "OUTPUT",
+        iptables_queue: null
+    };
+
+    for (var prop in config) {
+        if (!config[prop] && (data && data[prop])) config[prop] = data[prop];
+        if (!config[prop] && ((data && !data[prop]) || !data) && setting[prop]) {
+            if (prop != "id" && prop != "name") config[prop] = setting[prop];
+        }
+    }
+
+    if (config.id) $('#configSelector').val(config.id);
+    else $('#configSelector').val("Create new config");
+    $('#configname').val(config.name).trigger('change');
+    $('#configinput').val(config.input_file).trigger('change');
+    $('#configoutput').val(config.output_file).trigger('change');
+    if (config.direction == "inject" && config.message) {
+        $('#configMessageSelector').val(config.message.active).trigger('change');
+        $('#configmessage').val(config.message.message).trigger('change');
+        $('#configmessagelink').val(config.message.message_link).trigger('change');
+    }
+    $('#configsrcip').val(config.src_ip).trigger('change');
+    $('#configsrcport').val(config.src_port).trigger('change');
+    $('#configdstip').val(config.dst_ip).trigger('change');
+    $('#configdstport').val(config.dst_port).trigger('change');
+    $('#configproto').val(config.proto).trigger('change');
+    $('#filteriptableschain').val(config.iptables_chain).trigger('change');
+    $('#filteriptablesqueue').val(config.iptables_queue).trigger('change');
+    fillMapping(config.mapping);
+}
+
+function fillMapping(data) {
+    var mapping = {
+        id: null,
+        name: "",
+        technique: null,
+        bits: 1,
+        layer: "IP",
+        valuemappings: null,
+        parameters: null
+    };
+
+    for (var prop in mapping) {
+        if (!mapping[prop] && (data && data[prop])) mapping[prop] = data[prop];
+    }
+
+    if (mapping.id) $('#mappingSelector').val(mapping.id);
+    else $('#mappingSelector').val('Create new mapping');
+    $('#mappingname').val(mapping.name).trigger('change');
+    $('#mappingtechnique').val(mapping.technique).trigger('change');
+    $('#mappingbits').val(mapping.bits).trigger('change');
+    $('#mappingLayerSelector').val(mapping.layer).trigger('change');
+    numberOfValueMappings = 1;
+    if (mapping.valuemappings) {
+        mapping.valuemappings.forEach(function (vm) {
+            addMappingDetail('#valuemapping-area', vm.id, vm.data_from, vm.symbol_to, "Value mapping " + numberOfValueMappings.toString(), "is-valid");
+            numberOfValueMappings++;
+        });
+    }
+    numberOfParameters = 1;
+    if (mapping.parameters) {
+        mapping.parameters.forEach(function (param) {
+            addMappingDetail('#parameter-area', param.id, param.name, param.value, "Parameter " + numberOfParameters.toString(), "is-valid");
+            numberOfParameters++;
+        });
+    }
+
+    config.mapping = mapping;
 }
 /* ------------ END HELPER FUNC ------------ */

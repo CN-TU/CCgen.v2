@@ -172,17 +172,17 @@ def process_summary(modus, config, frames):
         print("  Required packets: ", required_pkts)    
         print("  Modified packets: ", frames)
     elif modus[0] == 2:
-        text = util.helper.bin2text(None, config.output_file)
-        if len(text.strip()) == 0: 
+        output = util.helper.getOutputFile(config.output_file, config.outfile_type)
+        if not output or len(output.strip()) == 0: 
             result = "failed"
             comment = "FAILED!!<br>Configured covert channel could not be found!"
             print("  FAILED!!")
         else:
             result = "succeeded"
-            comment = "SUCCEEDED!!<br>Inscpected packets: " + str(frames) + "<br>Check obtained message in " + config.output_file + " file."
+            comment = "SUCCEEDED!!<br>Inscpected packets: " + str(frames) + "<br>Check obtained message in " + config.output_file.replace('.txt', config.outfile_type) + " file."
             print("  SUCCEEDED!!")
             print("  Inspected packets: ", frames)
-            print("  Check obtained message in " + config.output_file + " file.")
+            print("  Check obtained message in " + config.output_file.replace('.txt', "." + config.outfile_type) + " file.")
     elif modus[0] == 3:
         required_pkts = config.message.necessary_packets()    
         if required_pkts == frames:
@@ -196,17 +196,17 @@ def process_summary(modus, config, frames):
         print("  Required packets: ", required_pkts)    
         print("  Modified packets: ", frames)   
     elif modus[0] == 4:
-        text = util.helper.bin2text(None, config.output_file)
-        if len(text.strip()) == 0: 
+        output = util.helper.getOutputFile(config.output_file, config.outfile_type)
+        if not output or len(output.strip()) == 0: 
             result = "failed"
             comment = "FAILED!!<br>Configured covert channel could not be found!"
             print("  FAILED!!")
         else:
             result = "succeeded"
-            comment = "SUCCEEDED!!<br>Inscpected packets: " + str(frames) + "<br>Check obtained message in " + config.output_file + " file."
+            comment = "SUCCEEDED!!<br>Inscpected packets: " + str(frames) + "<br>Check obtained message in " + config.output_file.replace('.txt', config.outfile_type) + " file."
             print("  SUCCEEDED!!")
             print("  Inspected packets: ", frames)
-            print("  Check obtained message in " + config.output_file + " file.") 
+            print("  Check obtained message in " + config.output_file.replace('.txt', "." + config.outfile_type) + " file.") 
 
     if abort: 
         result = "aborted"

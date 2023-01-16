@@ -156,11 +156,16 @@ function showTaskDetails(elem) {
         $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Direction:</b></p><p class="text-left"> ' + task['direction'] + '</p></div>');
         $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Config:</b></p><p class="text-left"> ' + task['config_name'] + '</p></div>');
         if (!task['config']) $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Wrapped config:</b></p><p class="text-left">true</p></div>');
-        if (task['direction'] == "inject") $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Message:</b></p><p class="text-left w-50"> ' + task['message'] + '</p></div>');
+        var max = 50;
+        var message = task['message'];
+        if (task['message'].length < 30) max = task['message'].length;
+        else message = task['message'].slice(0,max) + "...";
+        if (task['direction'] == "inject") $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Message:</b></p><p class="text-left w-50"> ' + message + '</p></div>');
         $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Result:</b></p><p class="text-left ' + getTextColorClass(task['status']) +'"> ' + task['status'] + '</p></div>');
         $('#infos').append('<div class="d-flex mt-2 mb-1"><b>[Details]</b></div>');
         if (task['network'] == "offline") $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Input file:</b></p><p class="text-left w-70"> ' + task['input_file'] + '</p></div>');
         if (task['network'] == "offline") $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Output file:</b></p><p class="text-left w-70"> ' + task['output_file'] + '</p></div>');
+        if (task['config_file']) $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Config export:</b></p><p class="text-left w-70"> ' + task['config_file'] + '</p></div>');
         $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Mapping:</b></p><p class="text-left"> ' + task['mapping'] + '</p></div>');
         $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Technique:</b></p><p class="text-left"> ' + task['technique'] + '</p></div>');
         if (task['src_ip']) $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Source IP Address:</b></p><p class="text-left"> ' + task['src_ip'] + '</p></div>');

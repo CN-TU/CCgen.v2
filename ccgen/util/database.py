@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy import Column, String, Integer, DateTime, Table, Boolean, ForeignKey, UniqueConstraint, func, desc
+from sqlalchemy import Column, String, Integer, DateTime, Table, Boolean, ForeignKey, UniqueConstraint
 from sqlalchemy.sql.expression import delete
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
@@ -42,7 +42,7 @@ ItemMessages = Table('Message_items', Base.metadata,
 class Task(Base, SerializerMixin):
     __tablename__ = 'Tasks'
 
-    serialize_only = ('id', 'date_created', 'date_started', 'date_finished', 'network', 'direction', 'input_file', 'output_file', 'config_name', 
+    serialize_only = ('id', 'date_created', 'date_started', 'date_finished', 'network', 'direction', 'input_file', 'output_file', 'config_file', 'config_name', 
         'src_ip', 'src_port', 'dst_ip', 'dst_port', 'proto', 'iptables_chain', 'iptables_queue', 'mapping', 'technique', 'message', 'config', 
         'status', "comment")
     
@@ -54,6 +54,7 @@ class Task(Base, SerializerMixin):
     direction = Column(String(150), nullable=False)
     input_file = Column(String(500), nullable=True, default=None)
     output_file = Column(String(500), nullable=True, default=None)
+    config_file = Column(String(500), nullable=True, default=None)
     config_name = Column(String(500), nullable=False)
     src_ip = Column(String(39), nullable=True, default=None)
     dst_ip = Column(String(39), nullable=True, default=None)

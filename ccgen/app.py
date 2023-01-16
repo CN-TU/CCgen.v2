@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, redirect
 from flask_cors import CORS, cross_origin
 import logging
 
@@ -56,6 +56,11 @@ def configurator():
 def settings():
   return render_template("settings.html")
 
+@app.route("/interface")
+@cross_origin()
+def interface():
+  return render_template("interface.html")
+
 @app.route("/isConfigNameUnique")
 @cross_origin()
 def isConfigNameUnique():
@@ -109,7 +114,7 @@ def hasGoFlowsInstalled():
 @cross_origin()
 def shallUpdateDashboardTables():
   return shouldUpdateDashboard()
-  
+
 def parseMapping(config):
   valuemappings = []
   for valuemapping in config['mapping']['valuemappings']:
@@ -166,6 +171,7 @@ def parseMessage(setting, isTask=False, isWrapper=False):
 @cross_origin()
 def processWrapper():
   wrappedConfig = request.json 
+  util.helper.configToFile(wrappedConfig, None, True)
   
   inj_tasks = []
   ext_tasks = []
@@ -178,12 +184,14 @@ def processWrapper():
   for c_idx in range(len(wrappedConfig['configs'])):
     mapping = parseMapping(wrappedConfig['configs'][c_idx]) 
     message = parseMessage(wrappedConfig['configs'][c_idx], True, True)   
+    outfiletype = wrappedConfig['configs'][c_idx]['outfiletype']
     req_pkts = len(util.helper.text2bin(message))
 
     for i in range(int(wrappedConfig['configs'][c_idx]['repetition'])):
       filters = wrapper.getFilters(wrappedConfig['configs'][c_idx], req_pkts)
       if not filters: continue
       
+      config_file = util.helper.configToFile(wrappedConfig['configs'][c_idx], filters, False, str("%02d" %c_idx))
       no_cc += 1
       if no_cc == 1:
         input_file = wrappedConfig['input_file']
@@ -204,15 +212,15 @@ def processWrapper():
 
       task_inj = Task(status="queued", date_created=datetime.datetime.now(), direction="inject", network="offline", message=message,
         input_file=config.input_file, output_file=config.output_file, config_name=wrappedConfig['configs'][c_idx]['name'], src_ip=config.src_ip, src_port=config.src_port,
-        dst_ip=config.dst_ip, dst_port=config.dst_port, proto=config.proto, mapping=config.mapping.name, technique=config.mapping.technique, config=config)
+        dst_ip=config.dst_ip, dst_port=config.dst_port, proto=config.proto, mapping=config.mapping.name, technique=config.mapping.technique, config=config, config_file=config_file)
       inj_tasks.append(task_inj)
 
       #create extraction tasks
-      output_txt = util.helper.OUT_FOLDER + "/" + "%03d" %c_idx + "_" + config.mapping.technique[:-3] + '_' + "%03d" %i + ".txt"
+      output_txt = util.helper.OUT_FOLDER + "/" + "%03d" %c_idx + "_" + config.mapping.technique[:-3] + '_' + "%03d" %i + "." + outfiletype
       config_name = "%03d" %c_idx + "_extract_" + wrappedConfig['configs'][c_idx]['name'] + '_' + "%03d" %i
       config = Config(name=config_name, wrapper_config=True, input_file=wrappedConfig['output_file'], output_file=output_txt, src_ip=filters['src_ip'],
         src_port=filters['src_port'], dst_ip=filters['dst_ip'], dst_port=filters['dst_port'], proto=filters['proto'], mapping=mapping)
-      
+
       task_ext = Task(status="queued", date_created=datetime.datetime.now(), direction="extract", network="offline", message=None, input_file=config.input_file,
         output_file=config.output_file, config_name=wrappedConfig['configs'][c_idx]['name'], src_ip=config.src_ip, src_port=config.src_port,
         dst_ip=config.dst_ip, dst_port=config.dst_port, proto=config.proto, mapping=config.mapping.name, technique=config.mapping.technique, config=config)
@@ -238,6 +246,7 @@ def processWrapper():
 @cross_origin()
 def addTask():
   config = request.json
+  config_file = util.helper.configToFile(config, None, False)
 
   mapping = parseMapping(config)
   message = parseMessage(config, True)
@@ -262,7 +271,7 @@ def addTask():
 
   task = Task(status="queued", date_created=datetime.datetime.now(), direction=config['direction'], network=config['network'], message=message,
     input_file=c.input_file, output_file=c.output_file, config_name=c.name, src_ip=c.src_ip, src_port=c.src_port, dst_ip=c.dst_ip, dst_port=c.dst_port, 
-    proto=c.proto, iptables_chain=c.iptables_chain, iptables_queue=c.iptables_queue, mapping=c.mapping.name, technique=c.mapping.technique, config=c)  
+    proto=c.proto, iptables_chain=c.iptables_chain, iptables_queue=c.iptables_queue, mapping=c.mapping.name, technique=c.mapping.technique, config=c, config_file=config_file)  
   task = accessOrModifyDB("flask", "add", task, "Task")
 
   if task: scheduler.addToQueue(task)

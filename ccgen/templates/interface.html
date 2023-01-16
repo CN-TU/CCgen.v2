@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
+    <link href="/static/css/interface.css" rel="stylesheet">
+    <script src="/static/js/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/interface.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="icon" type="image/png" href="" />
+    <title>CCgen.v2 Configurator</title>
+</head>
+
+<body class="w-100" style="overflow: auto;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="">
+            <ul class="navbar-nav d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="configurator">Configurator</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="settings">Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="interface">Interface</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="d-flex w-100 justify-content-center">
+        <div class="d-block w-50 p-5">
+            <label class="mb-3 form-label">Upload config and send it to CCgen directly.</label>
+            <div class="input-group">
+                <input type="file" class="form-control" id="configfile" accept="application/JSON">
+                <label class="input-group-text btn-primary" onclick="validateInputFile()">Validate</label>
+            </div>
+        </div>
+        
+    </div>      
+    <div class="modal" id="configsummary" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Config summary</h5>
+                    <button type="button" class="close" onclick="closeModal()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" id="editBtn" class="btn btn-secondary" onclick="loadConfig()">Edit with
+                        configurator</button>
+                    <button type="submit" id="sendBtn" class="btn btn-primary" onclick="sendConfig()">Send
+                        config</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

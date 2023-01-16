@@ -17,6 +17,7 @@ Config = namedtuple('Config',
         'direction',
         'input_file',
         'output_file',
+        'outfile_type',
         'src_ip',
         'dst_ip',
         'src_port',
@@ -42,7 +43,9 @@ def parse_config(configfile, user_message, direction, network):
     print("  input_file: ", configfile.input_file)
     print("  output_file: ", configfile.output_file)
     print("  mapping: ", configfile.mapping.name)
-    if direction == "inject": print("  message: ", user_message)
+    max = 30
+    if user_message and len(user_message) < 50: max = len(user_message)
+    if direction == "inject": print("  message: ", user_message[:max])
 
     print("\n[FILTER]")
     print("  src_ip: ", configfile.src_ip)
@@ -64,11 +67,18 @@ def parse_config(configfile, user_message, direction, network):
     if user_message: message = Message(user_message, configfile.mapping.bits, mapping.getparams())    
     covertchannel = CovertChannel(0 if network == NETWORK_OFFLINE else 1, configfile, message.message if direction == DIRECTION_SEND else None)
 
+    outtype = None
+    output_file = configfile.output_file
+    if direction == DIRECTION_RECEIVE: 
+        outtype = configfile.output_file.split(".")[-1]
+        output_file = output_file.replace("." + outtype, ".txt")
+        
     return Config(
         network=network,
         direction=direction,
         input_file=configfile.input_file,
-        output_file=configfile.output_file,
+        output_file=output_file,
+        outfile_type=outtype,
         src_ip=configfile.src_ip,
         dst_ip=configfile.dst_ip,
         src_port=configfile.src_port,

@@ -60,6 +60,9 @@ else
     cp $INSTALL_DIR/ccgen/data/ccgen_data_default.db $INSTALL_DIR/ccgen/data/ccgen_data.db
 fi
 
+#create configs folder
+mkdir $INSTALL_DIR/configs
+
 #finished
 echo "Successfully installed CCgen.v2!"
 echo "To use the wrapper, go-flows is required. Check out the README file in ccgen/wrapper/ folder in order to know how to install go-flows."
