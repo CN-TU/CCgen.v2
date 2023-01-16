@@ -32,6 +32,7 @@ CCgen.v2 is a new version of CCgen.v1 (Link: https://github.com/CN-TU/py_CCgen) 
     - Direct **control** for **Spammer VM** without opening any additional terminal or software.
     - Strong **Validation model** stabilizes the software
     - Easy and user-friendly **GUI**.
+    - JSON-interface to quickly import configurations in json format.
 
 
 ## Requirements
@@ -89,6 +90,9 @@ The main purpose of the CCgen-wrapper is to allow the automatic injection of mul
 ### (3) Settings
 The *CCgen.v2 Settings* is intended to pre-configure input fields of the *CCgen.v2 Configurator*. This should ease the use of the configurator.\
 Each mode (a1,a2,b1,b2) of the configurator can have its own presets. They are saved to database after validation. If "create new config" is selected in the *CCgen.v2 Configurator*, the preset matching the network and direction select, is preloaded and the input fields are set with its values.
+
+### (4) Interface
+The *CCgen.v2 Interface* is a json interface to quickly import CCgen.v2 configurations in json format. Single configuration can be send either to the *CCgen.v2 Configurator* where the configuration can be changed or they can be send directly to the CCgen.v2 core module. Wrapper configurations can only be send to the CCgen.v2 core module, where they are processed.
 
 ## Examples
 
