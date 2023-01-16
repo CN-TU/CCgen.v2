@@ -158,8 +158,8 @@ function showTaskDetails(elem) {
         if (!task['config']) $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Wrapped config:</b></p><p class="text-left">true</p></div>');
         var max = 50;
         var message = task['message'];
-        if (task['message'].length < 30) max = task['message'].length;
-        else message = task['message'].slice(0,max) + "...";
+        if (task['message'] && task['message'].length < 30) max = task['message'].length;
+        else if (task['message']) message = task['message'].slice(0,max) + "...";
         if (task['direction'] == "inject") $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Message:</b></p><p class="text-left w-50"> ' + message + '</p></div>');
         $('#infos').append('<div class="d-flex"><p class="w-30 text-left"><b>Result:</b></p><p class="text-left ' + getTextColorClass(task['status']) +'"> ' + task['status'] + '</p></div>');
         $('#infos').append('<div class="d-flex mt-2 mb-1"><b>[Details]</b></div>');
