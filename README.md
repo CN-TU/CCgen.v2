@@ -2,7 +2,7 @@
 
 - *... 2020, FM*
 - *Nov 2021, FIV*
-- *Sep 2022, KM*
+- *May 2023, KM*
 
 CCgen.v2 is the refactorized version of CCgen.v1 refined and developed by Kaspar Meusburger.
 
@@ -19,12 +19,12 @@ CCgen.v2 is a tool for creating, transmitting, and retrieving covert channels in
 
 CCgen.v2 has two operation modi: (a) **online**, in which covert channels are generated on-the-fly and transmitted to an aimed destination address, and (b) **offline**, in which covert channels are injected into existing flows of pcap captures. It also shows two operation roles: (1) **injector**, which creates and/or injects a covert channel, and (2) **extractor**, which receives and/or discloses a covert channel. 
 
-CCgen.v2 is a new version of CCgen.v1 (Link: https://github.com/CN-TU/py_CCgen) and comes with following improvements and features:
+CCgen.v2 (Link: https://github.com/CN-TU/CCgen.v2) is a new version of CCgen.v1 (Link: https://github.com/CN-TU/py_CCgen) and comes with following improvements and features:
 
 - Improvements:
     - **No** use of **mapping files** anymore -> replaced by mathematic formula.
     - **No** use of **text-based configurations** -> replaced by GUI with strong validation model.
-    - **Multiple configurations** of covert channel generations are possible due to queueing logic. This replaces ```ccgen_wrapper_*.py```.
+    - Included wrapper functionality which replaces ```ccgen_wrapper_*.py```.
 
 - Features:
     - Implementation of **database** to switch between different techniques and modes.
@@ -32,7 +32,7 @@ CCgen.v2 is a new version of CCgen.v1 (Link: https://github.com/CN-TU/py_CCgen) 
     - Direct **control** for **Spammer VM** without opening any additional terminal or software.
     - Strong **Validation model** stabilizes the software
     - Easy and user-friendly **GUI**.
-    - JSON-interface to quickly import configurations in json format.
+    - JSON-**interface** to quickly import ordinary and wrapper configurations in JSON format.
 
 
 ## Requirements
@@ -43,12 +43,13 @@ To run this application following software and programs are needed:
 ## Installation
 For installation, run the linux bash script *install.sh* with the command inside a terminal:
 
--> `sh install.sh`
+-> `bash install.sh`
 
 ## Run
 Open Linux-terminal in the main directory of CCgen.v2. Then do following:
 
 - Execute run script with ```sh run.sh``` command
+- Select if you want to start up online mode too.
 - Go to browser and open: ```localhost:5000```
 
 ## CCgen.v2
@@ -56,43 +57,49 @@ Open Linux-terminal in the main directory of CCgen.v2. Then do following:
 ### (1) Dashboard
 The *CCgen.v2 Dashboard* has three main functions:
 1. **Queue** table:\
-Queues generating tasks. After configuring a task, it will land here.
+Queue of open tasks. After configuring one task or a wrapper, they will land here.
 2. **History** table:\
 Already finished/done tasks are displayed here.
 3. Control of **Spammer Virtual Machine**:\
-For online injection, a second device is needed. In this section, one can controll the second machine as well as configure it for spamming IP-packets.
+For online injection, a second device is needed. In this section, one can control the second machine as well as configure it for spamming IP-packets.
 
 ### (2) Configurator
-The *CCgen.v2 Configurator* can be used to configure all four different modes: (a1) online injector, (a2) online extractor, (b1) offline injector, (b2) offline extractor.
+The *CCgen.v2 Configurator* is designed to configure injection and extraction tasks in all four modes. The modes are: 
+- (a1) online injector
+- (a2) online extractor
+- (b1) offline injector
+- (b2) offline extractor.
+
+The extractor functionality is designed for proving if injection has worked correctly.
 
 In general, one configuration can be separated in three sub-categories: 
 - **General**\
-In this section general data of one configuration are saved. It consists the name (for saving in db), input/output file paths and message (which will be injected).
+In this section general data of one configuration are saved. It consists the name (for saving in db), input/output file paths and message (which will be injected). The source of message can either be a link to a file on the server machine, or it can be entered directly into text box.
 
 - **Filters**\
-In this section the connection/conversation is defined. Therefore, filters for source/destination IP (ipv4 & ipv6), source/destination port (tcp/udp) and the ip protocol number can be configured. Depending on network mode (online/offline), the filteres are append to a pre-captured .pcap file (offline) or to the network interface (online).
+In this section the connection/conversation is defined. Therefore, filters for source/destination IP (ipv4 & ipv6), source/destination port (tcp/udp) and the ip protocol number can be configured. Depending on network mode (online/offline), the filteres are appended to a pre-captured .pcap file (offline) or to the network interface (online).
 
 - **Channel & Mapping**\
-In this section the technique to implement the covert channel is defined. The CCgen.v2 is built, that every technique has a own script. This script is referenced in this part of the configuration. Additionally it is mandatory to configure the number of bits, the layer as well as parameters and value mappings.\
+In this section the technique of the covert channel is defined. The CCgen.v2 is built, that every technique has a own script. This script is referenced in this part of the configuration. Additionally it is mandatory to configure the number of bits, the layer as well as parameters and value mappings.\
 **Parameters** are used to customizeably define parameters, which are referenced in the given technique file (python script).\
-**Value mappings** are specified, if one bit value is not converted directly. (E.g. Normally "b'01" -> 1, but with specified value mapping: "b'01" -> 24)
+**Value mappings** are specified, if one bit value is not converted directly. (E.g. Normally "b'01" -> 1, but with specified value mapping the value could be mapped like: "b'01" -> 24)
 
-- **Config wrapper**
+- **Config wrapper**\
 The main purpose of the CCgen-wrapper is to allow the automatic injection of multiple covert channels in the same pcap. It has three different parts:
-    1. Searching for matching flows and creating corresponding ccGen configurations.
+    1. Searching for matching flows and creating corresponding ccGen.v2 configurations.
     2. Injecting the covert channels.
-    3. Extracting the covert channels to evaluate the previous injection
+    3. Extracting the covert channels to evaluate the previous injection.
 
-    This mode can be used by creating a new configuration for **offline injection** by clicking the **Add to wrapper** button after successful validation. To validate the wrapper config, click Validate button in top right corner.
+This mode can be used by creating a new configuration for **offline injection** by clicking the **Add to wrapper** button after successful validation. To validate the wrapper config, click Validate button in top right corner.
 
-    For more information, read the README.md file in `~/CCgen.v2/ccgen/wrapper/README.md`.
+For more information, read the README.md file in `~/CCgen.v2/ccgen/wrapper/README.md`.
 
 ### (3) Settings
 The *CCgen.v2 Settings* is intended to pre-configure input fields of the *CCgen.v2 Configurator*. This should ease the use of the configurator.\
 Each mode (a1,a2,b1,b2) of the configurator can have its own presets. They are saved to database after validation. If "create new config" is selected in the *CCgen.v2 Configurator*, the preset matching the network and direction select, is preloaded and the input fields are set with its values.
 
 ### (4) Interface
-The *CCgen.v2 Interface* is a json interface to quickly import CCgen.v2 configurations in json format. Single configuration can be send either to the *CCgen.v2 Configurator* where the configuration can be changed or they can be send directly to the CCgen.v2 core module. Wrapper configurations can only be send to the CCgen.v2 core module, where they are processed.
+The *CCgen.v2 Interface* is a JSON interface to quickly import CCgen.v2 configurations in JSON format. Single configuration can be send either to the *CCgen.v2 Configurator* where the configuration can be changed or they can be send directly to the CCgen.v2 core module. Wrapper configurations can only be send to the CCgen.v2 core module, where they are processed.
 
 ## Examples
 

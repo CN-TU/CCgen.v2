@@ -254,6 +254,8 @@ The technique proposed by Shah et al. [[16]](#references) is designed to interfe
 
 #### ZAN (#19)
 
+This is a technique originally described for the Time-to-Live (TTL) field by Zander et al. in [[13]](#references), yet easily applicable to IATs. This technique makes use of two parameters, tb and tinc.tb refers to the base IDT at which packets may be sent and tinc to the time that may be added or substracted from tb. If the covert symbol 0 is to be transmitted, the IDT is set to tb; if the covert symbol 1 is to be transmitted, however, the IDT is set to tb ± tinc. Addition and substraction are applied alternately on subsequently occurring 1 symbols.
+
 - Config: *timing_zan*
 - Mapping: *mapping_timing_zan*
 - Bits: 1
@@ -264,6 +266,8 @@ The technique proposed by Shah et al. [[16]](#references) is designed to interfe
     - *pTinc* (incrementing value beeing subtracted or added to base time)
 
 #### ZAN2 (#20)
+
+This implementation of covert timing channel is not a dedicated technique in literature but its base idea is after a figure in [[13]](#references), where three time constants are needed to cover each possible transition with the symbol '0' and '1'. Let the transition from 0 to 1 be time constant A, and 1 to 0 the time constant B, then is the transition from 0 to 0 time constant C - A and the transition from 1 to 1 C - B.
 
 - Config: *timing_zan2*
 - Mapping: *mapping_timing_zan2*
@@ -276,6 +280,8 @@ The technique proposed by Shah et al. [[16]](#references) is designed to interfe
     - *pC* (time constant C)
 
 #### ED1 (#21)
+
+This technique [[18]](#references) encodes the covert symbol 0 with a waiting time t0 (authors suggest 300 ms), whereas the covert symbol 1 triggers the immediate sending of a packet. Note that t0 is not defining any IDT; therefore, sending 0s does not imply sending any packet. For example, if ‘A’, which corresponds to the ASCII encoding ‘01000001’, is to be covertly send, the sender will follow this sequence: (1) wait 300 ms, (2) send one packet, (3) wait 1.5 s (300 ms×5), (4) send one packet. Messages are forced to finish transmitting a ‘1’.
 
 - Config: *timing_ed1*
 - Mapping: *mapping_timing_ed1*
@@ -320,3 +326,5 @@ The technique proposed by Shah et al. [[16]](#references) is designed to interfe
 [16] Shah, G., Molina, A., & Blaze, M. (2006, July). Keyboards and Covert Channels. In USENIX Security Symposium (Vol. 15, p. 64). [Link](https://www.usenix.org/legacy/events/sec06/tech/full_papers/shah/shah.pdf)
 
 [17] Fisk, G., Fisk, M., Papadopoulos, C., & Neil, J. (2002, October). Eliminating steganography in Internet traffic with active wardens. In International workshop on information hiding (pp. 18-35). Springer, Berlin, Heidelberg. [Link](https://link.springer.com/chapter/10.1007/3-540-36415-3_2)
+
+[18] Castillo, Eduardo J., Xenia Mountrouidou, and Xiangyang Li. “Time Lord: Covert Timing Channel Implementation and Realistic Experimentation.” In Proceedings of the 2017 ACM SIGCSE Technical Symposium on Computer Science Education, 755–56. SIGCSE ’17. New York, NY, USA: Association for Computing Machinery, 2017. [Link](https://doi.org/10.1145/3017680.3022463)
